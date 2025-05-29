@@ -1,12 +1,19 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted, watch, reactive } from 'vue';
 import { useProjectStore } from '@/Stores/projectStore';
 import Pagination from '@/Components/Pagination.vue';
+import TextInput from '@/Components/TextInput.vue';
+import SelectInput from '@/Components/SelectInput.vue';
+import { debounce } from 'lodash';
 
 const props = defineProps({
     projects: Object,
+    filters: Object,
+    sort_by: String,
+    sort_direction: String,
+    projectStatuses: Array,
 });
 
 const projectStore = useProjectStore();
@@ -58,6 +65,48 @@ onUnmounted(() => {
     }
 });
 
+// Reactive object for local filter state
+const localFilters = reactive({
+    search: props.filters.search || '',
+    status: props.filters.status || '',
+});
+
+const localSortBy = ref(props.sort_by);
+const localSortDirection = ref(props.sort_direction);
+
+// Debounced function to apply filters
+const applyFiltersAndSort = debounce(() => {
+    router.get(route('projects.index'), {
+        search: localFilters.search,
+        status: localFilters.status,
+        sort_by: localSortBy.value,
+        sort_direction: localSortDirection.value,
+    }, {
+        preserveState: true,
+        replace: true,
+        preserveScroll: true,
+    });
+}, 500);
+
+watch(localFilters, applyFiltersAndSort);
+
+const sortBy = (column) => {
+    if (localSortBy.value === column) {
+        localSortDirection.value = localSortDirection.value === 'asc' ? 'desc' : 'asc';
+    } else {
+        localSortBy.value = column;
+        localSortDirection.value = 'asc';
+    }
+    applyFiltersAndSort();
+};
+
+const getSortIcon = (column) => {
+    if (localSortBy.value === column) {
+        return localSortDirection.value === 'asc' ? '▲' : '▼';
+    }
+    return '';
+};
+
 </script>
 
 <template>
@@ -82,13 +131,33 @@ onUnmounted(() => {
                         Create New Project
                     </Link>
 
+                    <div class="mb-4">
+                        <TextInput v-model="localFilters.search" placeholder="Search projects..." class="mr-2" />
+                        <SelectInput v-model="localFilters.status" :options="[{ value: '', label: 'All' }, ...projectStatuses]" placeholder="Select status" class="mr-2" />
+                    </div>
+
                     <div v-if="projectStore.projects && projectStore.projects.data && projectStore.projects.data.length > 0">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tasks</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <div class="flex items-center cursor-pointer" @click="sortBy('name')">
+                                            Name
+                                            <span class="text-gray-400 text-xs ml-1" v-html="getSortIcon('name')"></span>
+                                        </div>
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <div class="flex items-center cursor-pointer" @click="sortBy('status')">
+                                            Status
+                                            <span class="text-gray-400 text-xs ml-1" v-html="getSortIcon('status')"></span>
+                                        </div>
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <div class="flex items-center cursor-pointer" @click="sortBy('tasks')">
+                                            Tasks
+                                            <span class="text-gray-400 text-xs ml-1" v-html="getSortIcon('tasks')"></span>
+                                        </div>
+                                    </th>
                                     <th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th>
                                 </tr>
                             </thead>
