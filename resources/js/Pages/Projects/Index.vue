@@ -21,10 +21,15 @@ const page = usePage();
 
 projectStore.setProjects(props.projects);
 
-// Watch for changes in props.projects (e.g., after pagination)
 watch(() => props.projects, (newProjects) => {
-    projectStore.setProjects(newProjects);
-}, { deep: true });
+    projectStore.setProjects(
+        newProjects,
+        props.filters,
+        props.sort_by,
+        props.sort_direction,
+        newProjects.meta?.current_page || 1 // current page
+    );
+}, { deep: true, immediate: true });
 
 
 const deleteProject = (projectId) => {
@@ -32,6 +37,7 @@ const deleteProject = (projectId) => {
         router.delete(route('projects.destroy', projectId), {
             preserveScroll: true,
             onSuccess: () => {
+                projectStore.invalidateCache();
             }
         });
     }
@@ -44,7 +50,7 @@ onMounted(() => {
             .listen('.ProjectCreated', (event) => {
                 console.log('ProjectCreated event received:', event.project);
                 alert(`New project created: ${event.project.name}`);
-                // projectStore.addProjectToList(event.project);
+                projectStore.invalidateCache();
                 router.reload({ only: ['projects'], preserveScroll: true }); // Reload data
             })
             .listen('.ProjectUpdated', (event) => {
@@ -54,6 +60,7 @@ onMounted(() => {
             .listen('.ProjectDeleted', (event) => {
                 console.log('ProjectDeleted event received:', event.projectId);
                 projectStore.removeProjectFromList(event.projectId);
+                projectStore.invalidateCache();
             });
     }
 });
