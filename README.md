@@ -1,61 +1,160 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Laravel 10 & Vue 3 Full Stack Integration Challenge
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This project is a data management system for "Projects," demonstrating integration between a Laravel backend and a Vue 3 frontend using Inertia.js. It includes CRUD operations, real-time updates via Laravel Echo and Pusher, advanced filtering, sorting, pagination, and client-side caching with Pinia.
 
-## About Laravel
+## Tech Stack
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+*   **Primary:** Laravel 10
+*   **Secondary:** Vue.js 3 (Composition API)
+*   **Additional:**
+    *   Inertia.js 1.0
+    *   PostgreSQL 15
+    *   Pinia 2 (State Management)
+    *   Pest 2 (PHP Testing)
+    *   Laravel Echo & Pusher (Real-time)
+    *   Tailwind CSS (via Jetstream)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Features
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+*   **Project Management:** CRUD operations for projects.
+*   **Task & Subtask Relationships:** Projects can have tasks, and tasks can have subtasks (demonstrating Eloquent relationships).
+*   **User Authentication:** Provided by Laravel Jetstream. Projects are user-specific.
+*   **Real-time Updates:** Changes to projects (create, update, delete) are broadcast using Laravel Events and Pusher, updating the UI in real-time for connected clients viewing the same user's data.
+*   **Advanced Filtering:** Filter projects by search term (name, description) and status.
+*   **Sorting:** Sort projects by name, status, or creation date.
+*   **Pagination:** Project list is paginated.
+*   **Client-Side Caching:** Basic localStorage caching of fetched project lists via Pinia to improve perceived performance on re-visits (though Inertia's server-driven nature makes this supplemental).
+*   **Responsive UI:** Basic responsiveness via Tailwind CSS.
 
-## Learning Laravel
+## Setup Instructions
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/lmsutools/curotec-challenge
+    cd inertia-challenge
+    ```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+2.  **Install PHP Dependencies:**
+    ```bash
+    composer install
+    ```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+3.  **Install NPM Dependencies:**
+    ```bash
+    npm install
+    ```
 
-## Laravel Sponsors
+4.  **Environment Setup:**
+    *   Copy `.env.example` to `.env`:
+        ```bash
+        cp .env.example .env
+        ```
+    *   Generate an application key:
+        ```bash
+        php artisan key:generate
+        ```
+    *   Configure your database connection in `.env` (ensure you have PostgreSQL running and a database created):
+        ```env
+        DB_CONNECTION=pgsql
+        DB_HOST=127.0.0.1
+        DB_PORT=5432
+        DB_DATABASE=inertia_challenge_db
+        DB_USERNAME=your_postgres_user
+        DB_PASSWORD=your_postgres_password
+        ```
+    *   Configure Pusher credentials in `.env` (sign up at [pusher.com](https://pusher.com) for a free sandbox plan):
+        ```env
+        BROADCAST_DRIVER=pusher
+        PUSHER_APP_ID=your_app_id
+        PUSHER_APP_KEY=your_app_key
+        PUSHER_APP_SECRET=your_app_secret
+        PUSHER_APP_CLUSTER=your_cluster
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+        VITE_PUSHER_APP_KEY="${PUSHER_APP_KEY}"
+        VITE_PUSHER_APP_CLUSTER="${PUSHER_APP_CLUSTER}"
+        # Add other VITE_PUSHER vars if needed as per bootstrap.js
+        ```
 
-### Premium Partners
+5.  **Run Database Migrations:**
+    ```bash
+    php artisan migrate
+    ```
+    *(Optional: Run seeders if you create any: `php artisan db:seed`)*
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+6.  **Compile Frontend Assets:**
+    *   For development (with hot reloading):
+        ```bash
+        npm run dev
+        ```
+    *   For production:
+        ```bash
+        npm run build
+        ```
 
-## Contributing
+7.  **Serve the Application:**
+    ```bash
+    php artisan serve
+    ```
+    The application should be available at `http://127.0.0.1:8000`.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Application Structure & Design Patterns
 
-## Code of Conduct
+*   **Backend (Laravel):**
+    *   **MVC Pattern:** Standard Laravel structure.
+    *   **Eloquent ORM:** Used for database interaction and relationships (`Project`, `Task`, `Subtask` models).
+    *   **Resource Controllers:** `ProjectController` handles CRUD for projects.
+    *   **Form Requests:** `StoreProjectRequest` and `UpdateProjectRequest` for validation.
+    *   **Policies:** `ProjectPolicy` for authorization.
+    *   **Events & Broadcasting:** Laravel Events (`ProjectCreated`, `Updated`, `Deleted`) are broadcast via Pusher for real-time updates. Uses `ShouldBroadcastNow`.
+    *   **Query Scopes:** `scopeFilter` in `Project` model for cleaner filtering logic.
+    *   **Dependency Injection:** Used throughout Laravel (e.g., in controllers, event listeners).
+    *   **Service Providers:** Standard Laravel providers, including `BroadcastServiceProvider` for broadcasting.
+*   **Frontend (Vue 3 & Inertia):**
+    *   **Inertia.js:** Connects Laravel backend to Vue frontend, allowing server-side routing with client-side rendering (SPA-like experience).
+    *   **Vue 3 Composition API:** Used in all Vue components for better organization and reusability.
+    *   **Pinia:** For global state management (`projectStore`). Stores project list, manages loading/error states, and handles some real-time update logic.
+    *   **Reusable Components:** Standard Jetstream components (`InputLabel`, `TextInput`, etc.) and custom components (`Pagination`, `TextareaInput`, `SelectInput`).
+    *   **Pages:** Inertia pages in `resources/js/Pages/Projects` (`Index.vue`, `CreateEditForm.vue`).
+    *   **Layouts:** `AppLayout.vue` (from Jetstream) provides the main application shell.
+*   **Data Flow (Inertia):**
+    1.  User action (e.g., click link, submit form).
+    2.  Inertia makes an XHR request to Laravel.
+    3.  Laravel controller processes request, fetches data.
+    4.  Controller returns an `Inertia::render()` response with page component name and props.
+    5.  Inertia dynamically updates the Vue page component with new props.
+*   **Real-time Updates:**
+    1.  Action in Laravel (e.g., `ProjectController@store`) dispatches an event.
+    2.  Event (implementing `ShouldBroadcastNow`) is sent to Pusher.
+    3.  Laravel Echo (in `Projects/Index.vue`) listens for the event on a private channel.
+    4.  On receiving the event, Pinia store is updated, or data is reloaded, causing UI to refresh.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## API Endpoints & Payloads (Simplified for Inertia context)
 
-## Security Vulnerabilities
+Inertia doesn't expose traditional REST APIs for direct consumption by other clients, but the controller actions and their expected data are as follows:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+*   **`GET /projects`**:
+    *   Params: `page`, `search`, `status`, `sort_by`, `sort_direction`
+    *   Returns: Inertia response for `Projects/Index` page with paginated projects, filters, etc.
+*   **`GET /projects/create`**:
+    *   Returns: Inertia response for `Projects/CreateEditForm` page.
+*   **`POST /projects`**:
+    *   Payload: `{ name: string, description?: string, status: string }`
+    *   Returns: Redirect to `/projects` with success/error flash message.
+*   **`GET /projects/{project}/edit`**:
+    *   Returns: Inertia response for `Projects/CreateEditForm` page with project data.
+*   **`PUT/PATCH /projects/{project}`**:
+    *   Payload: `{ name?: string, description?: string, status?: string }`
+    *   Returns: Redirect to `/projects` with success/error flash message.
+*   **`DELETE /projects/{project}`**:
+    *   Returns: Redirect to `/projects` with success/error flash message.
 
-## License
+## Code Comments & Complex Logic
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+*   Inline comments are provided for complex logic sections, especially in Vue components related to filtering, sorting, real-time event handling, and Pinia store interactions.
+*   Backend controller methods and event classes include comments explaining their purpose and interactions.
+
+## Running Tests
+
+```bash
+php artisan test tests/Feature/ProjectManagementTest.php
+```
