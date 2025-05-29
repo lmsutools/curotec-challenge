@@ -37,7 +37,7 @@ class ProjectController extends Controller
     public function store(StoreProjectRequest $request): RedirectResponse
     {
         $project = Auth::user()->projects()->create($request->validated());
-
+        event(new \App\Events\ProjectCreated($project));
         return redirect()->route('projects.index')->with('success', 'Project created successfully.');
     }
 
@@ -64,13 +64,17 @@ class ProjectController extends Controller
     {
         $this->authorize('update', $project);
         $project->update($request->validated());
+        event(new \App\Events\ProjectUpdated($project));
         return redirect()->route('projects.index')->with('success', 'Project updated successfully.');
     }
 
     public function destroy(Project $project)
     {
         $this->authorize('delete', $project);
+        $userId = $project->user_id;
+        $projectId = $project->id;
         $project->delete();
+        event(new \App\Events\ProjectDeleted($projectId, $userId));
         return redirect()->route('projects.index')->with('success', 'Project deleted successfully.');
     }
 }
