@@ -18,14 +18,30 @@ class ProjectController extends Controller
 
     public function index(Request $request): Response
     {
-        // Eager load tasks and their subtasks
-        $projects = Project::with(['tasks.subtasks'])
-            ->where('user_id', Auth::id()) // Only user's projects
-            ->latest() // Default sort by newest
-            ->paginate(10); // Basic pagination
+        $request->validate([
+            'sort_by' => 'nullable|string|in:name,status,created_at',
+            'sort_direction' => 'nullable|string|in:asc,desc',
+            'search' => 'nullable|string|max:100',
+            'status' => 'nullable|string|in:pending,in-progress,completed',
+        ]);
+
+        $filters = $request->only(['search', 'status']);
+        $sortBy = $request->input('sort_by', 'created_at'); // Default sort
+        $sortDirection = $request->input('sort_direction', 'desc');
+
+        $projects = Project::with(['tasks']) // Eager load only tasks, subtasks if needed on detail page
+            ->where('user_id', Auth::id())
+            ->filter($filters) // Apply scopeFilter
+            ->orderBy($sortBy, $sortDirection)
+            ->paginate(10)
+            ->withQueryString(); // Appends query parameters to pagination links
 
         return Inertia::render('Projects/Index', [
-            'projects' => $projects,
+            'projects' => \App\Http\Resources\ProjectResource::collection($projects),
+            'filters' => $filters, // Pass current filters back to frontend
+            'sort_by' => $sortBy,
+            'sort_direction' => $sortDirection,
+            'projectStatuses' => ['pending', 'in-progress', 'completed'], // For filter dropdown
         ]);
     }
 
