@@ -25,7 +25,6 @@ class ProjectResource extends JsonResource
             'tasks_count' => $this->whenLoaded('tasks', function() {
                 return $this->tasks->count();
             }),
-            'tasks' => TaskResource::collection($this->whenLoaded('tasks')),
         ];
     }
 }

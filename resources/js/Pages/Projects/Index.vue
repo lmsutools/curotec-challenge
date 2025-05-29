@@ -83,12 +83,16 @@ const localSortDirection = ref(props.sort_direction);
 
 // Debounced function to apply filters
 const applyFiltersAndSort = debounce(() => {
-    router.get(route('projects.index'), {
+    // Build params, omitting status if empty
+    const params = {
         search: localFilters.search,
-        status: localFilters.status,
         sort_by: localSortBy.value,
         sort_direction: localSortDirection.value,
-    }, {
+    };
+    if (localFilters.status) {
+        params.status = localFilters.status;
+    }
+    router.get(route('projects.index'), params, {
         preserveState: true,
         replace: true,
         preserveScroll: true,
@@ -140,7 +144,7 @@ const getSortIcon = (column) => {
 
                     <div class="mb-4">
                         <TextInput v-model="localFilters.search" placeholder="Search projects..." class="mr-2" />
-                        <SelectInput v-model="localFilters.status" :options="[{ value: '', label: 'All' }, ...projectStatuses]" placeholder="Select status" class="mr-2" />
+                        <SelectInput v-model="localFilters.status" :options="[{ value: '', label: 'All' }, ...projectStatuses.map(s => ({ value: s, label: s.charAt(0).toUpperCase() + s.slice(1).replace('-', ' ') }))]" placeholder="Select status" class="mr-2" />
                     </div>
 
                     <div v-if="projectStore.projects && projectStore.projects.data && projectStore.projects.data.length > 0">
