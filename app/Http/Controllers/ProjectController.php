@@ -34,7 +34,7 @@ class ProjectController extends Controller
             ->withQueryString(); // Appends query parameters to pagination links
 
         return Inertia::render('Projects/Index', [
-            'projects' => $projects,
+            'projects' => \App\Http\Resources\ProjectResource::collection($projects),
             'filters' => $filters, // Pass current filters back to frontend
             'sort_by' => $sortBy,
             'sort_direction' => $sortDirection,
